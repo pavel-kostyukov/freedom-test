@@ -12,4 +12,10 @@
             <p>Динамика: {{ currency['diff'] }}</p>
         {% endif %}
     </div>
+
+    <div class="error">
+        {% if error %}
+            <p style="color: red">Ошибка: {{ error }}</p>
+        {% endif %}
+    </div>
 {% endblock %}

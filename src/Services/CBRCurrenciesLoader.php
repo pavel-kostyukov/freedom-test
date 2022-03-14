@@ -18,6 +18,14 @@ class CBRCurrenciesLoader implements CurrenciesLoader
         $this->client = $client;
     }
 
+    /**
+     * Получение элемента валюты по дате
+     *
+     * @param string             $currencyCode Код валюты
+     * @param \DateTimeImmutable $date         Дата
+     *
+     * @return CurrencyItem
+     */
     public function getCurrencyValueByDate(string $currencyCode, \DateTimeImmutable $date): CurrencyItem
     {
         if ($foundCurrency = $this->repository->findCurrencyItemByDate($currencyCode, $date)) {
@@ -29,6 +37,14 @@ class CBRCurrenciesLoader implements CurrenciesLoader
         return $currencyItem;
     }
 
+    /**
+     * Создает объект элемента валюты
+     *
+     * @param string             $currencyBase Код валюты
+     * @param \DateTimeImmutable $dateTo       Дата
+     *
+     * @return CurrencyItem
+     */
     private function createCurrencyItem(string $currencyBase, \DateTimeImmutable $dateTo): CurrencyItem
     {
         $data = $this->client->getCurrencyDynamic(
@@ -36,6 +52,10 @@ class CBRCurrenciesLoader implements CurrenciesLoader
             $dateTo,
             $currencyBase
         );
+
+        if($data == false) {
+            throw new \LogicException('Некорректный ответ сервера');
+        }
 
         $previousValue = (float)$data->{'ValuteData'}->{'ValuteCursDynamic'}[0]?->Vcurs;
         $currentValue = (float)$data->{'ValuteData'}->{'ValuteCursDynamic'}[1]?->Vcurs;
@@ -51,6 +71,13 @@ class CBRCurrenciesLoader implements CurrenciesLoader
         return new CurrencyItem($currencyBase, $currentValue, $dateTo, $previousValue);
     }
 
+    /**
+     * Сохранение элемента
+     *
+     * @param CurrencyItem $currencyItem Элемент валюты
+     * 
+     * @return void
+     */
     private function saveCurrencyItem(CurrencyItem $currencyItem)
     {
         $this->repository->add($currencyItem);

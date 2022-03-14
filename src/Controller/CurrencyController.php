@@ -44,22 +44,30 @@ class CurrencyController extends AbstractController
 
         $form->handleRequest($request);
         if($form->isSubmitted()) {
-            $currency = $this->currenciesLoader->getCurrencyValueByDate(
-                $form->get('currency_code')->getData(),
-                $form->get('date')->getData()
-            );
+            try {
+                $currency = $this->currenciesLoader->getCurrencyValueByDate(
+                    $form->get('currency_code')->getData(),
+                    $form->get('date')->getData()
+                );
 
-            $result = [
-                'current_value' => $currency->getValue(),
-                'previews_day_value' => $currency->getPreviewDayValue(),
-                'diff' => $currency->getValuesDiff(),
-            ];
+                $result = [
+                    'current_value' => $currency->getValue(),
+                    'previews_day_value' => $currency->getPreviewDayValue(),
+                    'diff' => $currency->getValuesDiff(),
+                ];
+            } catch (\InvalidArgumentException|\LogicException $exception) {
+                $error = $exception->getMessage();
+            } catch (\Throwable) {
+                $error = 'Неизвестная ошибка';
+            }
+
         }
 
         return $this->renderForm('currency/index.html.twig', [
             'controller_name' => 'CurrencyController',
             'form' => $form,
-            'currency' => $result ?? null
+            'currency' => $result ?? null,
+            'error' => $error ?? null
         ]);
     }
 }
