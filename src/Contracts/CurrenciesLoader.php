@@ -6,5 +6,5 @@ use App\Entity\CurrencyItem;
 
 interface CurrenciesLoader
 {
-    public function getCurrencyValueByDate(string $currencyCode, \DateTimeInterface $date): CurrencyItem;
+    public function getCurrencyValueByDate(string $currencyCode, \DateTimeImmutable $date): CurrencyItem;
 }

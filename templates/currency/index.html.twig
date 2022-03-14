@@ -1,7 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello CurrencyController!{% endblock %}
+{% block title %}Динамика курса{% endblock %}
 
 {% block body %}
     {{ form(form) }}
+
+    <div class="result">
+        {% if currency %}
+            <p>Текущее значение: {{ currency['current_value'] }}</p>
+            <p>Значение на вчерашний день: {{ currency['previews_day_value']  }}</p>
+            <p>Динамика: {{ currency['diff'] }}</p>
+        {% endif %}
+    </div>
 {% endblock %}

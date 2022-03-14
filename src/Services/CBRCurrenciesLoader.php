@@ -3,40 +3,56 @@
 namespace App\Services;
 
 use App\Contracts\CurrenciesLoader;
+use App\Contracts\CurrencyClient;
 use App\Entity\CurrencyItem;
-use Predis\Client;
+use App\Repository\CurrencyRepository;
 
 class CBRCurrenciesLoader implements CurrenciesLoader
 {
-    private string $xmlUrl;
-    private \Redis $redis;
+    private CurrencyRepository $repository;
+    private CurrencyClient $client;
 
-    public function __construct(string $xmlUrl, Client $redis)
+    public function __construct(CurrencyRepository $repository, CurrencyClient $client)
     {
-        dd($redis);
-        $this->xmlUrl = $xmlUrl;
-        $this->redis = $redis;
+        $this->repository = $repository;
+        $this->client = $client;
     }
 
-    public function getCurrencyValueByDate(string $currencyCode, \DateTimeInterface $date): CurrencyItem
+    public function getCurrencyValueByDate(string $currencyCode, \DateTimeImmutable $date): CurrencyItem
     {
-        $this->loadXml();
+        if ($foundCurrency = $this->repository->findCurrencyItemByDate($currencyCode, $date)) {
+            return $foundCurrency;
+        }
+
+        $currencyItem = $this->createCurrencyItem($currencyCode, $date);
+        $this->saveCurrencyItem($currencyItem);
+        return $currencyItem;
     }
 
-    private function loadXml()
+    private function createCurrencyItem(string $currencyBase, \DateTimeImmutable $dateTo): CurrencyItem
     {
-        $document = new \DOMDocument();
-        $result = [];
+        $data = $this->client->getCurrencyDynamic(
+            $dateTo->sub(new \DateInterval('P1D')),
+            $dateTo,
+            $currencyBase
+        );
 
-        if($document->load($this->xmlUrl) === false) {
-            throw new \LogicException('Ошибка загрузки валют');
+        $previousValue = (float)$data->{'ValuteData'}->{'ValuteCursDynamic'}[0]?->Vcurs;
+        $currentValue = (float)$data->{'ValuteData'}->{'ValuteCursDynamic'}[1]?->Vcurs;
+
+        if(empty($previousValue) === true) {
+            throw new \InvalidArgumentException('Не найдено значение для предыдущего дня');
         }
 
-        foreach ($document->documentElement->getElementsByTagName('Valute') as $currency) {
-            $code = $currency->getElementsByTagName('CharCode')->item(0)->nodeValue;
-            $value = $currency->getElementsByTagName('Value')->item(0)->nodeValue;
-
-            $result[$code] = new CurrencyItem($code, $value);
+        if(empty($currentValue) === true) {
+            throw new \InvalidArgumentException('Не найдено значение для текущего дня');
         }
+
+        return new CurrencyItem($currencyBase, $currentValue, $dateTo, $previousValue);
+    }
+
+    private function saveCurrencyItem(CurrencyItem $currencyItem)
+    {
+        $this->repository->add($currencyItem);
     }
 }

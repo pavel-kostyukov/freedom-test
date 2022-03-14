@@ -23,10 +23,14 @@ class CurrencyController extends AbstractController
     #[Route('/currency', name: 'app_currency')]
     public function index(Request $request): Response
     {
-        $form = $this->createFormBuilder()
-            ->add('date', DateType::class, ['label' => 'Дата'])
+        $form = $this->createFormBuilder(null, ['csrf_protection' => false])
+            ->add('date', DateType::class, [
+                'label' => 'Дата',
+                'input' => 'datetime_immutable',
+            ])
             ->add('currency_code', TextType::class, [
                 'label' => 'Код валюты',
+                'data' => 'R01035'
             ])
             ->add('currency_base_code', TextType::class, [
                 'label' => 'Код базовой валюты',
@@ -40,12 +44,22 @@ class CurrencyController extends AbstractController
 
         $form->handleRequest($request);
         if($form->isSubmitted()) {
-            $this->currenciesLoader->getCurrencyValueByDate(new \DateTime());
+            $currency = $this->currenciesLoader->getCurrencyValueByDate(
+                $form->get('currency_code')->getData(),
+                $form->get('date')->getData()
+            );
+
+            $result = [
+                'current_value' => $currency->getValue(),
+                'previews_day_value' => $currency->getPreviewDayValue(),
+                'diff' => $currency->getValuesDiff(),
+            ];
         }
 
         return $this->renderForm('currency/index.html.twig', [
             'controller_name' => 'CurrencyController',
             'form' => $form,
+            'currency' => $result ?? null
         ]);
     }
 }

@@ -32,6 +32,7 @@ RUN set -eux; \
         php8-mbstring \
         php8-xml \
         php8-xmlreader \
+        php8-soap \
         libxml2-dev \
         oniguruma-dev \
         zlib-dev \
@@ -44,6 +45,7 @@ RUN set -eux; \
         pdo_mysql \
         xml \
         pcntl \
+        soap \
         mbstring \
         zip \
         exif \
