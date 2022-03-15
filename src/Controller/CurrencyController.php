@@ -53,7 +53,7 @@ class CurrencyController extends AbstractController
                 $result = [
                     'current_value' => $currency->getValue(),
                     'previews_day_value' => $currency->getPreviewDayValue(),
-                    'diff' => $currency->getValuesDiff(),
+                    'diff' => number_format($currency->getValuesDiff(), 4),
                 ];
             } catch (\InvalidArgumentException|\LogicException $exception) {
                 $error = $exception->getMessage();

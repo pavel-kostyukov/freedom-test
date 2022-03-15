@@ -4,15 +4,15 @@ namespace App\Services;
 
 use App\Contracts\CurrenciesLoader;
 use App\Contracts\CurrencyClient;
+use App\Contracts\CurrencyRepositoryInterface;
 use App\Entity\CurrencyItem;
-use App\Repository\CurrencyRepository;
 
 class CBRCurrenciesLoader implements CurrenciesLoader
 {
-    private CurrencyRepository $repository;
+    private CurrencyRepositoryInterface $repository;
     private CurrencyClient $client;
 
-    public function __construct(CurrencyRepository $repository, CurrencyClient $client)
+    public function __construct(CurrencyRepositoryInterface $repository, CurrencyClient $client)
     {
         $this->repository = $repository;
         $this->client = $client;

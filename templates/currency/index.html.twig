@@ -3,19 +3,24 @@
 {% block title %}Динамика курса{% endblock %}
 
 {% block body %}
-    {{ form(form) }}
+    <div class="row form mt-5">
+        <div class="col-12">
+            {{ form(form) }}
 
-    <div class="result">
-        {% if currency %}
-            <p>Текущее значение: {{ currency['current_value'] }}</p>
-            <p>Значение на вчерашний день: {{ currency['previews_day_value']  }}</p>
-            <p>Динамика: {{ currency['diff'] }}</p>
-        {% endif %}
+            <div class="result">
+                {% if currency %}
+                    <p>Текущее значение: {{ currency['current_value'] }}</p>
+                    <p>Значение на вчерашний день: {{ currency['previews_day_value']  }}</p>
+                    <p>Динамика: {{ currency['diff'] }}</p>
+                {% endif %}
+            </div>
+
+            <div class="error">
+                {% if error %}
+                    <p style="color: red">Ошибка: {{ error }}</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
-    <div class="error">
-        {% if error %}
-            <p style="color: red">Ошибка: {{ error }}</p>
-        {% endif %}
-    </div>
 {% endblock %}

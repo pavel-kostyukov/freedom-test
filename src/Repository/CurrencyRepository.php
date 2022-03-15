@@ -2,10 +2,11 @@
 
 namespace App\Repository;
 
+use App\Contracts\CurrencyRepositoryInterface;
 use App\Entity\CurrencyItem;
 use Predis\Client;
 
-class CurrencyRepository
+class CurrencyRepository implements CurrencyRepositoryInterface
 {
     private Client $redis;
     private string $namespace;
